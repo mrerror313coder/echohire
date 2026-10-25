@@ -135,13 +135,14 @@ export default function Home() {
 
   useEffect(() => {
     let storedUrl = readBackendUrl();
-    const hostedPage = window.location.hostname.endsWith(".onrender.com");
-    if (hostedPage && /127\.0\.0\.1|localhost/.test(storedUrl)) {
-      storedUrl = HOSTED_API;
+    if (window.location.hostname.endsWith(".onrender.com")) {
+      // Same-origin proxy. The browser no longer calls the API host directly,
+      // so a saved laptop address cannot leave the pill offline.
+      storedUrl = `${window.location.origin}/echo-api`;
       try {
         localStorage.setItem(URL_KEY, storedUrl);
       } catch {
-        // The in-memory URL still points at the hosted API for this visit.
+        // This visit still uses the proxy.
       }
     }
     setBaseUrl(storedUrl);
@@ -170,18 +171,10 @@ export default function Home() {
     let cancelled = false;
     async function ping() {
       let next = await checkBackendHealth(baseUrl);
-      const hostedPage = window.location.hostname.endsWith(".onrender.com");
-      if (!next && hostedPage && baseUrl !== HOSTED_API) {
-        next = await checkBackendHealth(HOSTED_API);
-        if (next) {
-          setBaseUrl(HOSTED_API);
-          setDraftUrl(HOSTED_API);
-          try {
-            localStorage.setItem(URL_KEY, HOSTED_API);
-          } catch {
-            // This visit still scores against the hosted API.
-          }
-        }
+      if (!next && window.location.hostname.endsWith(".onrender.com")) {
+        const proxy = `${window.location.origin}/echo-api`;
+        if (baseUrl !== proxy) next = await checkBackendHealth(proxy);
+        if (!next) next = await checkBackendHealth(HOSTED_API);
       }
       if (cancelled) return;
       setHealth(next);
