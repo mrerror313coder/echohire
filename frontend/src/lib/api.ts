@@ -67,7 +67,7 @@ export interface EvaluationResponse {
 }
 
 const LOCAL_HEALTH_TIMEOUT_MS = 4000;
-const REMOTE_HEALTH_TIMEOUT_MS = 45000;
+const REMOTE_HEALTH_TIMEOUT_MS = 90000;
 /** Local Gemma is allowed 90s. A CPU instance on Render is allowed 180s. */
 const LOCAL_EVALUATE_TIMEOUT_MS = 120_000;
 const REMOTE_EVALUATE_TIMEOUT_MS = 240_000;

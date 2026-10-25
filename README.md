@@ -80,7 +80,7 @@ The slow part of interview prep is replaying yourself and noticing the missing S
 | `backend/requirements-render.txt` | Slim Python dependencies for the Render image (no Whisper wheel) |
 | `backend/Dockerfile` | Render image: Python plus Ollama |
 | `backend/start.sh` | Starts Ollama, pulls `gemma2:2b` onto the disk, then uvicorn on `$PORT` |
-| `render.yaml` | Render Blueprint: free dashboard, 4 GB API with a 5 GB model disk |
+| `render.yaml` | Render Blueprint: free dashboard and free API |
 | `frontend/src/app/page.tsx` | Dark dashboard: status, history, role, studio, scorecard |
 | `frontend/src/components/RoleSelector.tsx` | Four roles, behavioral/technical toggle, privacy banner |
 | `frontend/src/components/InterviewStudio.tsx` | Question, read-aloud, recording, live WPM and STAR |
@@ -172,24 +172,20 @@ That file is gitignored. The hosted model is `openai/gpt-oss-20b`. The recording
 
 ## Deploy on Render
 
-The dashboard stays on Render's free plan. The API uses the **2 CPU / 4 GB** plan (`2c-4g`, $85 per month) plus a **5 GB** disk ($1.25 per month) so `gemma2:2b` can stay loaded. Render bills compute by the second. At that rate, $50 of credits covers about 17 days if the API is left running, or about $0.12 per hour if you suspend it between demos. Suspend `echohire-api` in the Render dashboard when you are finished so the credits stop draining.
-
-The $25 plan has 2 GB of RAM. The Gemma 2B weight file is already about 1.6 GB, so that plan has no room for the process. Whisper stays off the hosted image. The browser still fills the transcript. If Ollama is still pulling the model, or a score takes too long, the API returns the heuristic scorecard.
+Both services use Render's **$0 free plan** (512 MB). Free instances sleep after about 15 minutes without traffic, and the first open after sleep can take a minute. Whisper and Gemma stay off this image. The browser still fills the transcript. The hosted API scores with Groq, then the heuristic scorecard. Gemma still scores on a laptop where `gemma2:2b` is installed.
 
 | Service | Plan | What it runs |
 | --- | --- | --- |
 | `echohire-web` | Free, 512 MB | Next.js on `$PORT` |
-| `echohire-api` | 2 CPU / 4 GB, 5 GB disk | Ollama `gemma2:2b` plus FastAPI on `$PORT` |
+| `echohire-api` | Free, 512 MB | FastAPI on `$PORT`, scoring through Groq |
 
 The web service reads `NEXT_PUBLIC_API_URL` from the API service's public URL at build time. Locally, with that variable unset, the dashboard still calls `http://127.0.0.1:8000`.
 
 1. Push this repo to GitHub.
-2. In the Render dashboard, choose **New** → **Blueprint** and select the repo. Render reads `render.yaml` from the root.
+2. In the Render dashboard, choose **New** → **Blueprint** and select the repo. Render reads `render.yaml` from the root. Both plans must say **Free**.
 3. Apply the blueprint. The first web build can start before the API URL exists. If the live dashboard still points at `127.0.0.1`, open `echohire-web`, set `NEXT_PUBLIC_API_URL` to the API URL (it looks like `https://echohire-api.onrender.com`), and trigger a manual deploy of the web service.
-4. When Render asks for `GROQ_API_KEY`, paste the same key that is in `backend/.env`. Leave it blank only if you want the hosted API to wait for Gemma. The key is stored on the service, not in git.
-5. Open the web service URL. The first boot downloads `gemma2:2b` onto the disk (about 1.6 GB). With the Groq key set, the pill reads **FastAPI + Groq** and scores come from Groq while that download runs. Without the key, the pill reads **API up · model offline** until the pull finishes, then **FastAPI + Ollama**. Later restarts reuse the disk.
-
-CPU scoring on this instance is slower than a laptop GPU. The server waits up to 180 seconds for Gemma, then falls back to heuristics.
+4. When Render asks for `GROQ_API_KEY`, paste the same key that is in `backend/.env`. The key is stored on the service, not in git. Without it, Evaluate still returns the heuristic scorecard.
+5. Open the web service URL. After the free instance wakes, the pill reads **FastAPI + Groq**.
 
 ## Hacktoberfest 2026 Week 3
 
@@ -198,6 +194,6 @@ Week 3 asks for something built with open-weight or open-source AI that rewards 
 - Local inference with **Gemma 2B**, a featured category in the challenge.
 - Local speech with **faster-whisper**, so practice audio is not a SaaS upload.
 - A fallback path so the demo still finishes when a reviewer does not have Ollama running.
-- A public scoring API on **Render**. The dashboard is free. The API instance has 4 GB of RAM so Gemma 2B can score there, with the heuristic path still available while the model is downloading.
+- A public scoring API on **Render's free plan**. Groq scores there. Gemma 2B still runs on a machine that has the model installed.
 
 The challenge write-up belongs on DEV with the tag `#hf26challenge`. Details and the submission window are on the [Week 3 event](https://dev.to/events/81) and the [HF26 hub](https://dev.to/challenges/hf26). The event text says submissions are due October 25, 2026 at 11:59 PM PDT.
