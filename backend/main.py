@@ -686,9 +686,9 @@ def warm_whisper_import() -> None:
 
 @app.get("/", response_class=HTMLResponse)
 def root() -> str:
-    dashboard = os.environ.get("DASHBOARD_URL", "http://127.0.0.1:3000").strip().rstrip("/")
+    dashboard = os.environ.get("DASHBOARD_URL", "").strip().rstrip("/")
     if not dashboard:
-        dashboard = "http://127.0.0.1:3000"
+        dashboard = "https://echohire-web.onrender.com" if os.environ.get("RENDER") else "http://127.0.0.1:3000"
     safe_dashboard = html.escape(dashboard, quote=True)
     return """<!doctype html>
 <html lang="en">
