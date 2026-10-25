@@ -20,6 +20,7 @@ const QUESTIONS_KEY = "echohire.questions";
 const URL_KEY = "echohire.backendUrl";
 const QUESTION_LIMIT = 40;
 const DEFAULT_BACKEND = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+const HOSTED_API = "https://echohire-api-mzrq.onrender.com";
 const SESSION_LIMIT = 30;
 
 interface SavedSession {
@@ -133,7 +134,16 @@ export default function Home() {
   const historyPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const storedUrl = readBackendUrl();
+    let storedUrl = readBackendUrl();
+    const hostedPage = window.location.hostname.endsWith(".onrender.com");
+    if (hostedPage && /127\.0\.0\.1|localhost/.test(storedUrl)) {
+      storedUrl = HOSTED_API;
+      try {
+        localStorage.setItem(URL_KEY, storedUrl);
+      } catch {
+        // The in-memory URL still points at the hosted API for this visit.
+      }
+    }
     setBaseUrl(storedUrl);
     setDraftUrl(storedUrl);
     setSessions(readSessions());

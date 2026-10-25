@@ -14,6 +14,8 @@ services:
         value: openai/gpt-oss-20b
       - key: GROQ_API_KEY
         sync: false
+      - key: DASHBOARD_URL
+        value: https://echohire-web.onrender.com
 
   - type: web
     name: echohire-web
@@ -26,7 +28,4 @@ services:
       - key: NODE_VERSION
         value: "20.18.0"
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: echohire-api
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://echohire-api-mzrq.onrender.com

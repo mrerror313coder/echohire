@@ -183,7 +183,7 @@ The web service reads `NEXT_PUBLIC_API_URL` from the API service's public URL at
 
 1. Push this repo to GitHub.
 2. In the Render dashboard, choose **New** → **Blueprint** and select the repo. Render reads `render.yaml` from the root. Both plans must say **Free**.
-3. Apply the blueprint. The first web build can start before the API URL exists. If the live dashboard still points at `127.0.0.1`, open `echohire-web`, set `NEXT_PUBLIC_API_URL` to the API URL (it looks like `https://echohire-api.onrender.com`), and trigger a manual deploy of the web service.
+3. Apply the blueprint. `NEXT_PUBLIC_API_URL` is `https://echohire-api-mzrq.onrender.com`, so the dashboard calls that API. Next.js bakes this value in at build time, which is why a build that still has `127.0.0.1` shows **Backend offline** until this deploy finishes.
 4. When Render asks for `GROQ_API_KEY`, paste the same key that is in `backend/.env`. The key is stored on the service, not in git. Without it, Evaluate still returns the heuristic scorecard.
 5. Open the web service URL. After the free instance wakes, the pill reads **FastAPI + Groq**.
 

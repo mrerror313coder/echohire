@@ -7,6 +7,7 @@ a complete score payload.
 """
 
 import asyncio
+import html
 import json
 import logging
 import os
@@ -685,6 +686,10 @@ def warm_whisper_import() -> None:
 
 @app.get("/", response_class=HTMLResponse)
 def root() -> str:
+    dashboard = os.environ.get("DASHBOARD_URL", "http://127.0.0.1:3000").strip().rstrip("/")
+    if not dashboard:
+        dashboard = "http://127.0.0.1:3000"
+    safe_dashboard = html.escape(dashboard, quote=True)
     return """<!doctype html>
 <html lang="en">
 <head>
@@ -700,12 +705,12 @@ def root() -> str:
 <body>
   <main>
     <h1>EchoHire API</h1>
-    <p>This address is the local scoring server. The interview dashboard is at <a href="http://127.0.0.1:3000">127.0.0.1:3000</a>.</p>
+    <p>This address is the scoring server. The interview dashboard is at <a href="__DASHBOARD__">__DASHBOARD__</a>.</p>
     <p>Check the server at <a href="/health"><code>/health</code></a>. Answers are scored with <code>POST /evaluate</code>.</p>
   </main>
 </body>
 </html>
-"""
+""".replace("__DASHBOARD__", safe_dashboard)
 
 
 @app.get("/health", response_model=HealthResponse)
