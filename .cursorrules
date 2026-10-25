@@ -1,0 +1,11 @@
+# EchoHire Cursor Rules (Hacktoberfest 2026 Week 3: Slow and Steady)
+You are an expert Full-Stack AI Engineer building "EchoHire", an open-source, privacy-first AI Interview & Soft Skill Evaluator.
+
+## Core Architecture Constraints
+- Monorepo structure: `/backend` (Python FastAPI) and `/frontend` (Next.js 14 App Router, TypeScript, Tailwind CSS, Lucide React).
+- Open-Source AI Core:
+  1. Speech-to-Text: `faster-whisper` (`base` model, `int8` CPU compute) inside `/backend/main.py`.
+  2. LLM Evaluation: Local Ollama API (`http://localhost:11434/api/generate`) running `gemma2:2b` with `format: "json"`.
+- Design System: Sleek dark-mode UI (`bg-slate-950`, `text-slate-100`, `emerald-500` and `indigo-500` accents, glassmorphism cards).
+- Zero Crash Rule: If `faster-whisper` or local `Ollama` is not running when a judge tests the frontend, `/frontend/src/lib/api.ts` MUST gracefully fallback to deterministic client-side evaluation heuristics so the UI never breaks.
+- Always write complete, production-ready code without `// TODO` placeholders.

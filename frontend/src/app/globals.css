@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: #f1f5f9;
+  background: #020617;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@keyframes echohire-bar {
+  0%,
+  100% {
+    transform: scaleY(0.28);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.echohire-wave span {
+  transform-origin: center bottom;
+}
+
+.echohire-wave.is-live span {
+  animation: echohire-bar 0.9s ease-in-out infinite;
+}
+
+.echohire-wave.is-live span:nth-child(odd) {
+  animation-duration: 0.72s;
+}
+
+.echohire-wave.is-live span:nth-child(3n) {
+  animation-duration: 1.08s;
+}

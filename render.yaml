@@ -1,0 +1,47 @@
+# Render Blueprint.
+# The dashboard stays on the free plan. The API uses a 4 GB instance so
+# gemma2:2b can load. $50 of credits covers about 17 days if that instance
+# is left running; suspend echohire-api when the demo is finished.
+services:
+  - type: web
+    name: echohire-api
+    runtime: docker
+    plan: 2c-4g
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    healthCheckPath: /health
+    disk:
+      name: ollama-models
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: OLLAMA_BASE
+        value: http://127.0.0.1:11434
+      - key: OLLAMA_MODELS
+        value: /data/ollama
+      - key: OLLAMA_MODEL
+        value: gemma2:2b
+      - key: OLLAMA_GENERATE_TIMEOUT
+        value: "180"
+      - key: OLLAMA_NUM_CTX
+        value: "4096"
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
+      - key: GROQ_API_KEY
+        sync: false
+
+  - type: web
+    name: echohire-web
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npx next start -H 0.0.0.0 -p $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: "20.18.0"
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: echohire-api
+          envVarKey: RENDER_EXTERNAL_URL
