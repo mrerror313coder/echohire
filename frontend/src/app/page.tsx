@@ -169,7 +169,20 @@ export default function Home() {
     if (!ready) return;
     let cancelled = false;
     async function ping() {
-      const next = await checkBackendHealth(baseUrl);
+      let next = await checkBackendHealth(baseUrl);
+      const hostedPage = window.location.hostname.endsWith(".onrender.com");
+      if (!next && hostedPage && baseUrl !== HOSTED_API) {
+        next = await checkBackendHealth(HOSTED_API);
+        if (next) {
+          setBaseUrl(HOSTED_API);
+          setDraftUrl(HOSTED_API);
+          try {
+            localStorage.setItem(URL_KEY, HOSTED_API);
+          } catch {
+            // This visit still scores against the hosted API.
+          }
+        }
+      }
       if (cancelled) return;
       setHealth(next);
       setHealthChecked(true);
